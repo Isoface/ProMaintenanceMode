@@ -1,0 +1,20 @@
+main: com.hotmail.AdrianSR.ProMaintenanceMode.Main.MM
+name: ProMaintenanceMode
+version: 1.0.0
+author: AdrianSR
+
+commands:
+  Maintenance:
+    description: Maintenance Commands.
+    usage: /<Command> [arguments]
+    aliases: [mm, mn, mmode]
+
+permissions:
+
+  maintenance.op:
+    description: Allow players to use maintenance commands and join when the server is in maintenance.
+    default: op
+  
+  maintenance.join:
+    description: Allow players to join when the server is in maintenance.
+    default: op
