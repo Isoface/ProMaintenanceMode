@@ -9,6 +9,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Config;
+import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Util;
 
 public class Listeners implements Listener
 {
@@ -22,12 +23,6 @@ public class Listeners implements Listener
 	{
 		if (MM.getMaintenanceMode() == null) {
 			return;
-		}
-		
-		eve.setMaxPlayers(0);
-		
-		if (Config.MOTD_USE.toBoolean()) {
-			eve.setMotd(Config.MOTD_MESSAGE.toStringReplaceNumber(MM.getMaintenanceMode().getTimeWithFormat()));
 		}
 		
 		if (Config.ICON_USE.toBoolean() && MM.getIcon() != null) {
@@ -48,6 +43,6 @@ public class Listeners implements Listener
 			return;
 		}
 		
-		p.kickPlayer(Config.KICK_MESSAGE.toString());
+		p.kickPlayer(Util.wc(Config.KICK_MESSAGE.toString()));
 	}
 }

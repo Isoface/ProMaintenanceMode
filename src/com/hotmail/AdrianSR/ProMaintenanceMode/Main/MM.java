@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
 
 import javax.imageio.ImageIO;
 
@@ -21,6 +22,7 @@ public class MM extends JavaPlugin
 	private static MM instance;
 	private static MaintenanceMode mode;
 	private static CachedServerIcon newIcon = null;
+	private static ProtocolLibHandler lib;
 	
 	@Override
 	public void onEnable() 
@@ -28,7 +30,7 @@ public class MM extends JavaPlugin
 		// Set Instance;
 		instance = this;
 		
-		// Print Enabled Message.
+		// Print Enable Message!
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[MaintenanceMode] Enabled!");
 		
 		// Config.
@@ -55,6 +57,13 @@ public class MM extends JavaPlugin
 		
 		// Register events
 		new Listeners(this);
+		lib = new ProtocolLibHandler(this);
+		lib.register();
+	}
+	
+	public static boolean testingPlugin() 
+	{
+		return false;
 	}
 	
 	public static CachedServerIcon getIcon() 
@@ -155,23 +164,30 @@ public class MM extends JavaPlugin
 	@Override
 	public void onDisable() 
 	{
+		for (Handler handler : getLogger().getHandlers()) {
+			handler.close();
+		}
+
+		lib.unregister();
+
+		///////////////// Maintenance Save
 		if (mode == null || mode.getTimeUnit() == null || mode.getRemainingTime() <= 0) {
 			return;
 		}
-		
+
 		if (!Config.LAST_MAINTANCE_SAVE.toBoolean()) {
 			return;
 		}
-		
+
 		File f = new File(getDataFolder(), "ProMaintenanceMode.yml");
 		if (!f.exists())
 			loadConfig();
-		
+
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(f);
-		config.set("last-maintance-mode-time", (int)getMaintenanceMode().getRemainingTime());
+		config.set("last-maintance-mode-time", (int) getMaintenanceMode().getRemainingTime());
 		try {
 			config.save(f);
-		} 
-		catch (IOException e) {}
+		} catch (IOException e) {
+		}
 	}
 }
