@@ -19,6 +19,14 @@ public enum Config
 	// Maintenance Icon
 	ICON_USE("Use-Maintenance-Icon", true),
 	
+	// Hover
+	HOVER_USE("Hover.Enabled", true),
+	HOVER_MESSAGE("Hover.Message", "&4&lThis server is in maintenace!"),
+	
+	// Version String
+	VERSION_STRING_USE("Version.Use", true),
+	VERSION_STRING_MESSAGE("Version.Message", "&e&lMAINTENACE"),
+	
 	// Motd
 	MOTD_USE("ChangeMotd.Enabled", true),
 	MOTD_MESSAGE("ChangeMotd.Title", "&cServer in Maintenance | &aAvailable in &6{#}");
@@ -86,6 +94,11 @@ public enum Config
 		return replaceWord(toString(), word);
 	}
 	
+	public String toStringReplaPlayerName(String word)
+	{
+		return toString().replace("{player}", word);
+	}
+	
 	public String toStringReplacement(int number)
 	{
 		return replaceNumber(toString(),number);
@@ -105,6 +118,7 @@ public enum Config
 	{
 		return string.replace("{w}", word);
 	}
+	
 	
 	private String replaceNumber(String string, int number)
 	{
