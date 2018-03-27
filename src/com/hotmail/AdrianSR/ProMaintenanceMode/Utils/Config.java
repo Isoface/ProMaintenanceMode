@@ -2,8 +2,6 @@ package com.hotmail.AdrianSR.ProMaintenanceMode.Utils;
 
 import java.util.List;
 
-import org.bukkit.configuration.file.YamlConfiguration;
-
 public enum Config
 {
 	// Save Last MaintanceMode Time
@@ -29,12 +27,13 @@ public enum Config
 	
 	// Motd
 	MOTD_USE("ChangeMotd.Enabled", true),
-	MOTD_MESSAGE("ChangeMotd.Title", "&cServer in Maintenance | &aAvailable in &6{#}");
+	MOTD_PERMANETN_MM_STRING("ChangeMotd.PermanentTitle", "&4&lIndefinite"),
+	MOTD_MESSAGE("ChangeMotd.Title", "&cServer in Maintenance {n} &aAvailable in &6{#}");
 	
 	// Variables
 	private final String path;
     private final Object def;
-    private static YamlConfiguration file;
+    private static Utf8YamlConfiguration file;
 	
 	Config(String path, Object def) 
 	{
@@ -58,7 +57,7 @@ public enum Config
 	 * @param config
 	 *            The config to set.
 	 */
-	public static void setFile(YamlConfiguration config)
+	public static void setFile(Utf8YamlConfiguration config)
 	{
 		file = config;
 	}
@@ -118,7 +117,6 @@ public enum Config
 	{
 		return string.replace("{w}", word);
 	}
-	
 	
 	private String replaceNumber(String string, int number)
 	{

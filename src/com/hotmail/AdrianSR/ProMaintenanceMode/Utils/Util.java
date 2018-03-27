@@ -1,5 +1,8 @@
 package com.hotmail.AdrianSR.ProMaintenanceMode.Utils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,43 +27,36 @@ import org.bukkit.entity.Player;
 import com.google.common.base.Throwables;
 import com.hotmail.AdrianSR.ProMaintenanceMode.Main.MM;
 
-public class Util
-{
+public class Util {
 	public static final String EMPTY_ID = "0-0-0-0-0"; // Easiest format
-    public static final UUID EMPTY_UUID = UUID.fromString(EMPTY_ID);
-    
-	public static void print(String mess)
-	{
+	public static final UUID EMPTY_UUID = UUID.fromString(EMPTY_ID);
+
+	public static void print(String mess) {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[MaintenanceMode] " + mess);
 	}
 
-	public static String shortenString(String string, int characters)
-	{
-		if(string.length() <= characters)
+	public static String shortenString(String string, int characters) {
+		if (string.length() <= characters)
 			return string;
 		//
 		return string.substring(0, characters);
 	}
 
-	public static String wc(String g)
-	{
+	public static String wc(String g) {
 		return g == null ? "null String" : ChatColor.translateAlternateColorCodes('&', g);
 	}
 
-	public static String remC(String g)
-	{
+	public static String remC(String g) {
 		return g == null ? "null string" : ChatColor.stripColor(g);
 	}
 
-	public static ConfigurationSection createSectionIfNoExits(ConfigurationSection father, String newSectionName)
-	{
-		return father.isConfigurationSection(newSectionName) ? father.getConfigurationSection(newSectionName) : father.createSection(newSectionName);
+	public static ConfigurationSection createSectionIfNoExits(ConfigurationSection father, String newSectionName) {
+		return father.isConfigurationSection(newSectionName) ? father.getConfigurationSection(newSectionName)
+				: father.createSection(newSectionName);
 	}
 
-	public static int createSectionIfNoExitsInt(ConfigurationSection father, String newSectionName)
-	{
-		if (!father.isConfigurationSection(newSectionName) || father.getConfigurationSection(newSectionName) == null)
-		{
+	public static int createSectionIfNoExitsInt(ConfigurationSection father, String newSectionName) {
+		if (!father.isConfigurationSection(newSectionName) || father.getConfigurationSection(newSectionName) == null) {
 			father.createSection(newSectionName);
 			return 1;
 		}
@@ -68,16 +64,12 @@ public class Util
 		return 0;
 	}
 
-	public static int setDefaultIfNotSet(ConfigurationSection section, String path, Object str)
-	{
-		if(section != null)
-		{
-			if(!section.isSet(path))
-			{
-				if (str != null)
-				{
+	public static int setDefaultIfNotSet(ConfigurationSection section, String path, Object str) {
+		if (section != null) {
+			if (!section.isSet(path)) {
+				if (str != null) {
 					if (str instanceof String)
-						section.set(path, (String)str);
+						section.set(path, (String) str);
 					else
 						section.set(path, str);
 
@@ -88,8 +80,7 @@ public class Util
 		return 0;
 	}
 
-	public static <T> List<T> toList(Set<T> set)
-	{
+	public static <T> List<T> toList(Set<T> set) {
 		List<T> tor = new ArrayList<T>();
 		for (T t : set)
 			tor.add(t);
@@ -97,11 +88,9 @@ public class Util
 		return tor;
 	}
 
-	public static TimeUnit getUnit(String input)
-	{
+	public static TimeUnit getUnit(String input) {
 		TimeUnit u;
-		switch(input.toLowerCase())
-		{
+		switch (input.toLowerCase()) {
 		case "error":
 		default:
 			return null;
@@ -131,11 +120,9 @@ public class Util
 		return u;
 	}
 
-	public static String format(long miliseconds)
-	{
-		return DurationFormatUtils.formatDuration(miliseconds, Config.TIME_FORMAT.toString());//"H:mm:ss");
+	public static String format(long miliseconds) {
+		return DurationFormatUtils.formatDuration(miliseconds, Config.TIME_FORMAT.toString());// "H:mm:ss");
 	}
-
 
 	public static Object getHandle(World world) {
 		Object nms_entity = null;
@@ -220,69 +207,97 @@ public class Util
 
 		return equal;
 	}
-	
+
 	public static String substringBefore(String s, char c) {
-        int pos = s.indexOf(c);
-        return pos >= 0 ? s.substring(0, pos) : s;
-    }
-	
-	private static Method getPlayersMethod()
-	{
+		int pos = s.indexOf(c);
+		return pos >= 0 ? s.substring(0, pos) : s;
+	}
+
+	private static Method getPlayersMethod() {
 		Method legacy_getOnlinePlayers = null;
-		try 
-		{
+		try {
 			Method method = Server.class.getMethod("getOnlinePlayers");
-			if (method.getReturnType() == Player[].class) 
-			{
+			if (method.getReturnType() == Player[].class) {
 				legacy_getOnlinePlayers = method;
 			}
-		} 
-		catch (Throwable ignored) 
-		{
-			
+		} catch (Throwable ignored) {
+
 		}
 		return legacy_getOnlinePlayers;
 	}
-	
-	public static Collection<? extends Player> getPlayers() 
-	{
+
+	public static Collection<? extends Player> getPlayers() {
 		Collection<? extends Player> players;
 
-		try 
-		{
+		try {
 			// Meh, compatibility
 			players = MM.getInstance().getServer().getOnlinePlayers();
-		} 
-		catch (NoSuchMethodError e) 
-		{
-			try 
-			{
-				
+		} catch (NoSuchMethodError e) {
+			try {
+
 				players = Arrays.asList((Player[]) getPlayersMethod().invoke(MM.getInstance().getServer()));
-			} 
-			catch (InvocationTargetException ex) 
-			{
+			} catch (InvocationTargetException ex) {
 				throw Throwables.propagate(ex.getCause());
-			} 
-			catch (IllegalAccessException ex)
-			{
+			} catch (IllegalAccessException ex) {
 				throw Throwables.propagate(ex);
 			}
 		}
 
 		return players;
 	}
-	
-	public static Iterator<String> getRandomPlayers()
-	{
+
+	public static Iterator<String> getRandomPlayers() {
 		Collection<? extends Player> players = getPlayers();
 		List<String> result = new ArrayList<>(players.size());
 
-		for (Player player : players) 
-		{
+		for (Player player : players) {
 			result.add(player.getName());
 		}
 
 		return Randoms.shuffle(result).iterator();
 	}
+
+	public void convertFile(File f, File newFile)
+	{
+		try {
+		    FileInputStream fis = new FileInputStream(f);
+		    byte[] contents = new byte[fis.available()];
+		    fis.read(contents, 0, contents.length);
+		    String asString = new String(contents, "ISO8859_1");
+		    byte[] newBytes = asString.getBytes("UTF8");
+		    FileOutputStream fos = new FileOutputStream(newFile);
+		    fos.write(newBytes);
+		    fos.close();
+		    fis.close();
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
+	}
+	
+//	public static File createNewUTF8File(File folder, String name) 
+//	{
+//		Validate.notNull(folder, "The folder cant be null");
+//		Validate.isTrue(folder.isDirectory(), "The folder must be a Directory");
+//		
+//		try {
+//			final File f = new File(folder, name);
+//			if (!f.exists()) {
+//				f.createNewFile();
+//			}
+//			final FileInputStream fis = new FileInputStream(f);
+//			final  byte[] contents = new byte[fis.available()];
+//		    fis.read(contents, 0, contents.length);
+//		    final String asString = new String(contents, "ISO8859_1");
+//		    final byte[] newBytes = asString.getBytes("UTF8");
+//		    final FileOutputStream fos = new FileOutputStream(new File(folder, name));
+//		    f.delete();
+//		    fos.write(newBytes);
+//		    fos.close();
+//		    fis.close();
+//		    return new File(folder, name);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
 }
