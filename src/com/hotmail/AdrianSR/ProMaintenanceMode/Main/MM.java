@@ -10,11 +10,12 @@ import javax.imageio.ImageIO;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.CachedServerIcon;
 
 import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Config;
+import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Utf8YamlConfiguration;
 import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Util;
 
 public class MM extends JavaPlugin
@@ -22,7 +23,7 @@ public class MM extends JavaPlugin
 	private static MM instance;
 	private static MaintenanceMode mode;
 	private static CachedServerIcon newIcon = null;
-	private static ProtocolLibHandler lib;
+	private static ProtocolLibHandler lib = null;
 	
 	@Override
 	public void onEnable() 
@@ -32,18 +33,26 @@ public class MM extends JavaPlugin
 		
 		// Print Enable Message!
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[MaintenanceMode] Enabled!");
+
+		// Check ProtocolLib in server
+		Plugin plugin = this.getServer().getPluginManager().getPlugin("ProtocolLib");
+		if (plugin == null || !plugin.isEnabled()) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[MaintenanceMode] ProtocolLib not Found. Disabling...!");
+			Bukkit.getPluginManager().disablePlugin(this);
+			return;
+		}
 		
 		// Config.
 		loadConfig();
 		File f = new File(getDataFolder(), "ProMaintenanceMode.yml");
 		if (f.exists()) {
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(f);
+			Utf8YamlConfiguration config = Utf8YamlConfiguration.loadConfiguration(f);
 			Integer l = config.getInt("last-maintance-mode-time");
-			if (l > 0) 
+			if (l > 0 || l == -1)
 			{
 				MaintenanceMode mm = new MaintenanceMode(l, TimeUnit.SECONDS);
 				setMaintenanceMode(mm);
-				mm.Start();
+				mm.Start(config.getBoolean("Permanent"));
 			}
 		}
 		
@@ -54,11 +63,17 @@ public class MM extends JavaPlugin
 		new MMCommand(this);
 		MMCommand.registerArgument(new EnableMMArgument());
 		MMCommand.registerArgument(new StopMMArgument());
+		MMCommand.registerArgument(new ReloadMMArgument());
 		
 		// Register events
 		new Listeners(this);
 		lib = new ProtocolLibHandler(this);
 		lib.register();
+	}
+	
+	public void reload() 
+	{
+		loadConfig();
 	}
 	
 	public static boolean testingPlugin() 
@@ -71,7 +86,7 @@ public class MM extends JavaPlugin
 		return newIcon;
 	}
 	
-	public static MM getInstance() 
+	public static MM getInstance()
 	{
 		return instance;
 	}
@@ -131,6 +146,10 @@ public class MM extends JavaPlugin
 	
 	private void loadConfig()
 	{
+		if (!getDataFolder().isDirectory()) {
+			getDataFolder().mkdir();
+		}
+		
 		File f = new File(getDataFolder(), "ProMaintenanceMode.yml");
 		int save = 0;
 		if (f.exists()) {
@@ -141,7 +160,7 @@ public class MM extends JavaPlugin
 			}
 		}
 		
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(f);
+		Utf8YamlConfiguration config = Utf8YamlConfiguration.loadConfiguration(f);
 		for (Config g : Config.values()) 
 		{
 			if (g.getDefault() instanceof String)
@@ -162,19 +181,20 @@ public class MM extends JavaPlugin
 	}
 	
 	@Override
-	public void onDisable() 
+	public void onDisable()
 	{
 		for (Handler handler : getLogger().getHandlers()) {
 			handler.close();
 		}
-
-		lib.unregister();
-
-		///////////////// Maintenance Save
-		if (mode == null || mode.getTimeUnit() == null || mode.getRemainingTime() <= 0) {
+		
+		if (lib == null) {
 			return;
 		}
 
+		// Unregister ProtocolLib listener
+		lib.unregister();
+
+		// Save Maintenance Mode
 		if (!Config.LAST_MAINTANCE_SAVE.toBoolean()) {
 			return;
 		}
@@ -183,8 +203,15 @@ public class MM extends JavaPlugin
 		if (!f.exists())
 			loadConfig();
 
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(f);
-		config.set("last-maintance-mode-time", (int) getMaintenanceMode().getRemainingTime());
+		Utf8YamlConfiguration config = Utf8YamlConfiguration.loadConfiguration(f);
+		MaintenanceMode mm = getMaintenanceMode();
+		if (mm == null) {
+			return;
+		}
+
+		config.set("last-maintance-mode-time", (mm.isPermanent() ? -1 : (int) getMaintenanceMode().getRemainingTime()));
+		config.set("Permanent", mm.isPermanent());
+		
 		try {
 			config.save(f);
 		} catch (IOException e) {

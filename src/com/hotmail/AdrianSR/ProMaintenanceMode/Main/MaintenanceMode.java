@@ -8,13 +8,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Config;
 import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Util;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class MaintenanceMode 
 {
 	private final Integer time;
 	private final TimeUnit unit;
 	private Integer taskID = null;
+	private @Getter @Setter boolean permanent = false;
 	public ScheduledExecutorService executor;
 	
 	public MaintenanceMode(Integer time, TimeUnit unit) 
@@ -26,13 +31,21 @@ public class MaintenanceMode
 	
 	private int remainingTime = 0;
 	
-	public void Start() 
+	public void Start(boolean permanent) 
 	{
+		// Start Permanent
+		if (permanent) {
+			this.permanent = permanent;
+			return;
+		}
+
+		// Start not Permanent
 		if (time != null && time.longValue() > 0) {
 			if (unit != null) {
 				if (taskID == null) 
 				{
 					remainingTime = (int) (unit.toSeconds((long)time));
+					this.permanent = false;
 					
 					taskID = Integer.valueOf(new BukkitRunnable() 
 					{
@@ -66,9 +79,9 @@ public class MaintenanceMode
 		else Util.print(ChatColor.RED + "The maintenance mode is not started.");
 	}
 	
-	public String getTimeWithFormat() 
+	public String getTimeWithFormat()
 	{
-		return Util.format((((long)remainingTime) * 1000));
+		return permanent ? Config.MOTD_PERMANETN_MM_STRING.toString() : Util.format((((long) remainingTime) * 1000));
 	}
 	
 	public Integer getTime() 

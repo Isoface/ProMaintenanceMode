@@ -49,7 +49,15 @@ public class EnableMMArgument implements MMArgument
 				i = Integer.valueOf(args[0]);
 			}
 			catch(IllegalArgumentException t) {
-				sender.sendMessage(ChatColor.RED + "Invalid Number.");
+				if (args[0].equalsIgnoreCase("permanent") || args[0].equalsIgnoreCase("perm")) {
+					MaintenanceMode m = new MaintenanceMode(Integer.valueOf(-1), (TimeUnit)null);
+					MM.setMaintenanceMode(m);
+					m.Start(true);
+					sender.sendMessage(ChatColor.GREEN + ChatColor.BOLD.toString() + "Maintenance Mode Started in Permanent way!");
+				}
+				else {
+					sender.sendMessage(ChatColor.RED + "Invalid Number.");
+				}
 				return;
 			}
 			
@@ -68,7 +76,7 @@ public class EnableMMArgument implements MMArgument
 							// Set Maintenance Mode.
 							MaintenanceMode m = new MaintenanceMode(i, unit);
 							MM.setMaintenanceMode(m);
-							m.Start();
+							m.Start(false);
 						}
 						else {
 							sender.sendMessage(ChatColor.RED + "Invalid Time Unit.");

@@ -15,31 +15,28 @@ import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Config;
 import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.StatusHandler;
 import com.hotmail.AdrianSR.ProMaintenanceMode.Utils.Util;
 
-public class ProtocolLibHandler extends StatusHandler
-{
+public class ProtocolLibHandler extends StatusHandler {
 	private StatusPacketListener listener;
 	private Iterator<String> randomPlayers;
-	
-	protected ProtocolLibHandler(JavaPlugin plugin) 
-	{
+
+	protected ProtocolLibHandler(JavaPlugin plugin) {
 		super(plugin);
 	}
-	
-	public final class StatusPacketListener extends PacketAdapter
-	{
+
+	public final class StatusPacketListener extends PacketAdapter {
 		@SuppressWarnings("deprecation")
-		public StatusPacketListener() 
-		{
-			super(PacketAdapter.params(bukkit, PacketType.Status.Server.OUT_SERVER_INFO, PacketType.Handshake.Client.SET_PROTOCOL).optionAsync());
+		public StatusPacketListener() {
+			super(PacketAdapter
+					.params(bukkit, PacketType.Status.Server.OUT_SERVER_INFO, PacketType.Handshake.Client.SET_PROTOCOL)
+					.optionAsync());
 		}
 
 		@Override
-		public void onPacketReceiving(PacketEvent event)
-		{}
+		public void onPacketReceiving(PacketEvent event) {
+		}
 
 		@Override
-		public void onPacketSending(PacketEvent event) 
-		{
+		public void onPacketSending(PacketEvent event) {
 			// Check plugin is enabled.
 			if (bukkit == null || !bukkit.isEnabled())
 				return;
@@ -52,11 +49,12 @@ public class ProtocolLibHandler extends StatusHandler
 			// Get WrappedServerPing
 			final WrappedServerPing ping = event.getPacket().getServerPings().read(0);
 			final String playerName = event.getPlayer().getName();
+
 			// Set the MOTD
 			// Establece el MOTD
 			if (Config.MOTD_USE.toBoolean()) {
-				ping.setMotD(Util
-						.wc(Config.MOTD_MESSAGE.toStringReplaceNumber(MM.getMaintenanceMode().getTimeWithFormat())));
+				ping.setMotD(Util.wc(Config.MOTD_MESSAGE.toStringReplaPlayerName(playerName)).replace("{n}", "\n")
+						.replace("{#}", MM.getMaintenanceMode().getTimeWithFormat()));
 			}
 
 			// Set version string. (Only when the protocol is whit X).
@@ -92,38 +90,31 @@ public class ProtocolLibHandler extends StatusHandler
 			}
 		}
 	}
-	
-	public Iterator<String> getRandomPlayers()
-    {
-        if (randomPlayers != null) 
-        	return randomPlayers;
-        
-        this.randomPlayers = Util.getRandomPlayers();
-        return randomPlayers;
-    }
+
+	public Iterator<String> getRandomPlayers() {
+		if (randomPlayers != null)
+			return randomPlayers;
+
+		this.randomPlayers = Util.getRandomPlayers();
+		return randomPlayers;
+	}
 
 	@Override
-	public boolean register() 
-	{
-		if (listener == null)
-		{
+	public boolean register() {
+		if (listener == null) {
 			ProtocolLibrary.getProtocolManager().addPacketListener(this.listener = new StatusPacketListener());
 			return true;
-		}
-		else
+		} else
 			return false;
 	}
 
 	@Override
-	public boolean unregister() 
-	{
-		if (listener != null) 
-		{
+	public boolean unregister() {
+		if (listener != null) {
 			ProtocolLibrary.getProtocolManager().removePacketListener(listener);
 			this.listener = null;
 			return true;
-		} 
-		else
+		} else
 			return false;
 	}
 }
