@@ -1,7 +1,9 @@
-main: com.hotmail.AdrianSR.ProMaintenanceMode.Main.MM
+main: com.hotmail.AdrianSR.ProMaintenanceMode.Bukkit.Main.MM
 name: ProMaintenanceMode
-version: 1.0.0
+version: 1.0.2
 author: AdrianSR
+
+softdepend: [ProtocolLib]
 
 commands:
   Maintenance:
